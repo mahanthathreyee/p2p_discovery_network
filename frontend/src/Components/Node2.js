@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 
 function Node2() { 
 
-
   return ( 
     <div>
      
