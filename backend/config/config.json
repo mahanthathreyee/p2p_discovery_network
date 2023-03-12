@@ -1,0 +1,6 @@
+{
+    "secrets": {
+        "secrets_directory": "secrets",
+        "private_key_file": "server.pem"
+    }
+}
