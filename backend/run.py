@@ -6,6 +6,7 @@ import dotenv
 import config_store
 from utils import logger_handler
 from utils import cryptography_handler as app_security
+from utils import redis_handler
 
 # ROUTES
 from routes import discovery
@@ -26,9 +27,10 @@ def load_configurations():
 
     config_store.read_config()
     app_security.load_or_create_new_key()
+    redis_handler.configure_redis()
 
 def register_api_routes():
-    app.register_blueprint(discovery.simple_page)
+    app.register_blueprint(discovery.discover_endpoint)
 
 if __name__ == '__main__':
     load_configurations()
