@@ -6,6 +6,7 @@ from utils import logger_handler
 from constants import cryptography_constants as constants
 
 import pickle
+import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -85,3 +86,12 @@ def decrypt_data(cipher_text: str):
     )
 
     return pickle.loads(raw_content)
+
+
+def get_public_key():
+    key = PUBLIC_KEY.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return base64.b64encode(key).decode('utf-8')
