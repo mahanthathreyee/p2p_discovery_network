@@ -1,17 +1,24 @@
 from __future__ import annotations
 import json
+import time
+
+from constants.app_constants import NODE_HEALTH
 
 class Node:
-    def __init__(self, ip: str, public_key: str, name: str):
-        self.ip = ip
-        self.public_key = public_key
-        self.name = name
-    
-    def decode(json: str) -> Node:
-        return Node(json['ip'], json['public_key'], json['name'])
-    
-    def json_encode(self):
-        return json.dumps(self.__dict__)
-    
-    def json_decode(json):
-        return Node(json['ip'], json['public_key'], json['name'])
+    def __init__(self):
+        self.ip = None
+        self.public_key = None
+        self.name = None
+        self.health = NODE_HEALTH.UNKNOWN.name
+        self.last_checked = time.time_ns()
+
+    def new(ip: str, public_key: str, name: str, health = None, last_checked = time.time_ns()):
+        node = Node()
+        
+        node.ip = ip
+        node.public_key = public_key
+        node.name = name
+        node.health = health
+        node.last_checked = last_checked
+
+        return node

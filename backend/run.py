@@ -11,20 +11,23 @@ from classes.node import Node
 from utils import redis_handler
 from utils import logger_handler
 from utils import cryptography_handler as app_security
+from utils import node_handler
 
 # ROUTES
 from routes import discovery
+from routes import communication
 
 # CONSTANTS
 from constants import app_constants
 #endregion
 
-#region INIT
+#region LOCAL CONSTANTS
 app = Flask(__name__)
 ENV_VARIABLES = None
 LOCAL_DEBUG = True
 #endregion
 
+#region UTILITIES
 def load_configurations():
     if dotenv.load_dotenv(sys.argv[1]):
         global ENV_VARIABLES
@@ -44,6 +47,7 @@ def load_configurations():
 
 def register_api_routes():
     app.register_blueprint(discovery.discover_endpoint)
+    app.register_blueprint(communication.communicate_endpoint)
 
 def register_child_with_primary():
     name = namesgenerator.get_random_name()
@@ -51,19 +55,36 @@ def register_child_with_primary():
     public_key = app_security.get_public_key()
 
     node = Node(ip, public_key, name)
-    new_node = requests.post(
+    new_node_request = requests.post(
         f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
         json=node.__dict__
     )
 
-    if new_node.ok:
+    if new_node_request.ok:
         logger_handler.logging.info(f'New Node {name} registered with primary')
     else:
-        logger_handler.logging.info(f'Cannot register node: {new_node.status_code} - {new_node.content}')
+        logger_handler.logging.info(f'Cannot register node: {new_node_request.status_code} - {new_node_request.content}')
         exit()
     
-    new_node.close()
+    new_node_request.close()
+
+def get_cluster_nodes():
+    data_nodes = requests.get(
+        f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
+    )
+
+    if data_nodes.ok:
+        logger_handler.logging.info(f'Nodes retrieved: {data_nodes}')
+    else:
+        logger_handler.logging.info(f'Cannot retrieve node list: {data_nodes.status_code} - {data_nodes.content}')
+        exit()
     
+    nodes = data_nodes.json()
+    data_nodes.close()
+    node_handler.store_nodes(nodes)
+
+    
+#endregion
 
 if __name__ == '__main__':
     load_configurations()
@@ -71,5 +92,6 @@ if __name__ == '__main__':
     register_api_routes()
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
+        get_cluster_nodes()
 
     app.run(host=ENV_VARIABLES['host'], port=ENV_VARIABLES['port'], debug=LOCAL_DEBUG)

@@ -1,5 +1,6 @@
 REDIS_KEYS = {
-    'REDIS_NODE_DICT': 'nodes'
+    'NODE_DICT': 'nodes',
+    'MESSAGES': 'messages'
 }
 
 def configure(prefix: str):
