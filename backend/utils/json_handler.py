@@ -3,7 +3,11 @@ import json
 def encode(object: object):
     return json.dumps(object.__dict__)
 
-def decode(json, cls: object):
+def decode(json_str: str, cls: object):
+    print(type(json_str))
+    return decoder(json.loads(json_str), cls)
+
+def decoder(json, cls: object):
     obj = object.__new__(cls)
     obj.__init__()
 

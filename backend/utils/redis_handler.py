@@ -1,5 +1,6 @@
 import redis
 from constants import redis_constants
+from utils.logger_handler import logging
 
 #region CONSTANTS
 REDIS = None

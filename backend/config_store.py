@@ -7,6 +7,7 @@ import json
 
 #region CONFIGURATIONS
 APP_CONFIG = {}
+NODE_IP = None
 #endregion
 
 #region UTILITIES

@@ -12,6 +12,7 @@ from utils import redis_handler
 from utils import logger_handler
 from utils import cryptography_handler as app_security
 from utils import node_handler
+from utils import json_handler
 
 # ROUTES
 from routes import discovery
@@ -37,13 +38,14 @@ def load_configurations():
         exit()
 
     config_store.read_config()
+    redis_handler.configure_redis(ENV_VARIABLES['node'])
 
     if LOCAL_DEBUG:
         app_constants.CURRENT_WORKING_DIRECTORY /= f'node/{ENV_VARIABLES["node"]}'
         app_constants.CURRENT_WORKING_DIRECTORY.mkdir(exist_ok=True, parents=True)
 
     app_security.load_or_create_new_key()
-    redis_handler.configure_redis(ENV_VARIABLES['node'])
+    config_store.NODE_IP = f'{ENV_VARIABLES["host"]}:{ENV_VARIABLES["port"]}'
 
 def register_api_routes():
     app.register_blueprint(discovery.discover_endpoint)
@@ -51,10 +53,9 @@ def register_api_routes():
 
 def register_child_with_primary():
     name = namesgenerator.get_random_name()
-    ip = f'{ENV_VARIABLES["host"]}:{ENV_VARIABLES["port"]}' 
     public_key = app_security.get_public_key()
 
-    node = Node(ip, public_key, name)
+    node = Node.new(config_store.NODE_IP, public_key, name)
     new_node_request = requests.post(
         f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
         json=node.__dict__
@@ -81,15 +82,16 @@ def get_cluster_nodes():
     
     nodes = data_nodes.json()
     data_nodes.close()
+    nodes = [json_handler.decode(node, Node) for node in nodes]
     node_handler.store_nodes(nodes)
 
-    
 #endregion
 
 if __name__ == '__main__':
     load_configurations()
     logger_handler.configure_logger()
     register_api_routes()
+
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
         get_cluster_nodes()

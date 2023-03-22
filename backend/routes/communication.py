@@ -20,13 +20,13 @@ communicate_endpoint = Blueprint(
 @communicate_endpoint.post('')
 def recieve_message():
     body = request.json
-    if not request_handler.check_request_json(body, ['content', 'received_from']):
+    if not request_handler.check_request_json(body, ['content', 'sender']):
         return 'Bad Request', 400
     
     message = json_handler.decode(body, Message)
     
     redis_handler.REDIS.lpush(REDIS_KEYS['MESSAGES'], json_handler.encode(message))
-    return json_handler.encode(message)
+    return json_handler.encode(message), 201
 
 @communicate_endpoint.get('')
 def get_all_messages():
