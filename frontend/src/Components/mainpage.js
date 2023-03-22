@@ -2,96 +2,217 @@ import Table from 'react-bootstrap/Table';
 import Navbar from './navigation';
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import Data from "../data/mock.json";
+import Data1 from "../data/running.json";
   import { Redirect } from 'react-router'; 
 import Node1 from "./Node1.js";
+import Node2 from "./Node2.js";
+import Node3 from "./Node3.js";
+import Node4 from "./Node4.js";
 import { render } from 'react-dom';
 
-  //Get Method
+
+
+
+
+function MainPage() {
+  
+ 
+  
+
   
 
 
-class MainPage extends React.Component {
+  
+  //const [data, setData] = useState([]);
+  const [query, setQuery] = useState("");
+  
+  // const apiGet = () => {
+  //   fetch("https://jsonplaceholder.typicode.com/posts")
+  //     .then((response) => response.json())
+  //     .then((json) => {
+  //       console.log(json);
+  //       setData(json);
+  //     });
+  //   };
+  
+  const [selectedFile, setSelectedFile] = useState();
+  const [isFilePicked, setIsFilePicked] = useState(false);
+  
+  const changeHandler = (event) => {
+		setSelectedFile(event.target.files[0]);
+    setIsFilePicked(true);
+  };
 
+   const downloadTxtFile = () => {
+   const element = document.createElement("a");
+   const file = new Blob([document.getElementById('input').value],    
+               {type: 'text/plain;charset=utf-8'});
+   element.href = URL.createObjectURL(file);
+   element.download = "a.txt";
+   document.body.appendChild(element);
+   element.click();
+   }
+  
+  
+  const handleSubmission = () => {
+		const formData = new FormData();
 
-  render() {
-    
-    
-    const apiGet = () => {
-    fetch("https://jsonplaceholder.typicode.com/posts")
-      .then((response) => response.json())
-      .then((json) => {
-        console.log(json);
-        //setData(json.id);
-      });
-    };
+		formData.append('File', selectedFile);
+
+		fetch(
+			'https://httpbin.org/post', //some random post api for file upload
+			{
+				method: 'POST',
+				body: formData,
+			}
+		)
+			.then((response) => response.json())
+			.then((result) => {
+				console.log('Success:', result);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+  };
+  
+  const reload = () => {
+    <script>
+      location.reload();
+    </script>
+  };
+	
     
   const handleClick = async () => {
   const date = new Date();
 
+      <script>
+  const myFunction() {
+    document.getElementById("innerHTMLdemo").innerHTML = Date()
+  };
+</script>
+    return date;
       
-      console.log(date);
+  };
+    
+  const handleClick1 = async () => {
+  const date = new Date();
+
+      <script>
+  const myFunction() {
+    document.getElementById("innerHTMLdemo1").innerHTML = Date()
+  };
+</script>
+    return date;
       
     };
     
     
 
     return (
-      <div>
+     <div>
         <Navbar />
-        <button onClick={apiGet}>Fetch API</button>
+        <br></br>
+        <br></br>
+
+
        
-        {/* <div>
-        <ul>
-          {data.map((item) => (
-            <li key={item.id}>
-              {item.userId},{item.title}
-            </li>
+  
+
+
+       
+       
+       
+      {/* <div>
+          
+          Nodes: {data.map(item => (
+        <div key={item.id}>
+          <li>{item.userId}</li>
+          <li>{item.title}</li>
+          </div>
+        
           ))}
-        </ul>
+            
       </div> */}
-        <Table striped bordered hover size="sm">
-          <thead>
-            <tr>
-              <th>ip</th>
-              <th>Node List</th>
-              <th>Time</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>192.78.1.11</td>
-              <td><Link to='/Node1'>Node1</Link> <button onClick={handleClick}></button></td>
-             
-              <td>11:00</td>
-              <td>running</td>
-            </tr>
-            <tr>
-              <td>192.78.1.22</td>
-              <td><a href="*"> Node 2</a></td>
-              <td>11:05</td>
-              <td>running</td>
-            </tr>
-            <tr>
-              <td>192.78.3.22</td>
-              <td><a href="*"> Node 3</a></td>
-              <td>12:05</td>
-              <td>running</td>
-            </tr>
-            <tr>
-              <td>192.78.4.21</td>
-              <td><a href="*"> Node 4</a></td>
-              <td>12:40</td>
-              <td>running</td>
-            </tr>
-          </tbody>
-        </Table>
+        
+
+
+          <table className="table">
+            <thead>
+              <tr>
+                <th>S.N</th>
+                <th>Running Nodes</th>
+                <th>Status</th>
+                    
+              </tr>
+            </thead>
+            <tbody>
+              {
+                Data1.map(post1 => (
+                    
+                  <tr key={post1.id}>
+                    <td>{post1.id}</td>
+                    <td><Link to = {post1.Node_name}>{post1.Node_name}</Link></td>
+                    <td>{post1.Status}</td>
+                    
+                  </tr>
+                )
+                )
+              }
+            </tbody>
+          </table>
+        
         <br></br>
         <br></br>
         <br></br>
         <br></br>
+
       
-        <div align="center">
+      
+      <div align ="center">
+          <input placeholder="Search the File Name" onChange={event => setQuery(event.target.value)} />
+          <a href="/download" download="a.txt">
+  Download file 
+          </a>
+      </div>
+
+        
+        {
+          Data.filter(post => {
+            if (query === '') {
+              return null;
+            } else if (post.File_name.toLowerCase().includes(query.toLowerCase())) {
+              return post;
+            }
+          }).map((post, index) => (
+    <div className="box" key={index}>
+              <p><b>{post.Node_name}</b></p>
+               <p><b>{post.File_name}</b></p>
+                <p><b>{post.ip_address}</b></p>
+    </div>
+     ))
+        }
+
+        <div>
+			<input type="file" name="file" onChange={changeHandler} />
+			{isFilePicked ? (
+				<div>
+					<p>Filename: {selectedFile.name}</p>
+					<p>Filetype: {selectedFile.type}</p>
+					<p>Size in bytes: {selectedFile.size}</p>
+					<p>
+						lastModifiedDate:{' '}
+						{selectedFile.lastModifiedDate.toLocaleDateString()}
+					</p>
+				</div>
+			) : (
+				<p>Select a file to show details</p>
+			)}
+			<div>
+				<button onClick={handleSubmission}>upload</button>
+			</div>
+		</div>
+        {/* <div align="center">
           <h4>List of Files</h4>
       
           <ul align="left">
@@ -100,11 +221,11 @@ class MainPage extends React.Component {
             <li><a href='*'>File3.txt</a></li>
           </ul>
 
-        </div>
+        </div> */}
       </div>
       
     );
-  }
+  
 }
 
 export default MainPage;
