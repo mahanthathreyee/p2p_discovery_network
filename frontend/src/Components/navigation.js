@@ -1,20 +1,51 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <a className="navbar-brand" href="#">
-        CS 230
+      <a className="navbar-brand">
+        
+          CS 230
+        
+        
       </a>
       
       <div className="collapse navbar-collapse" id="navbarNavDropdown">
         <ul className="navbar-nav">
           <li className="nav-item active">
-            <a className="nav-link" href="#">
-              Home 
+            <a className="nav-link">
+              <Link to='/'>
+                Home
+              </Link>
+               
             </a>
           </li>
-          {/* <li className="nav-item">
+          <li className="nav-item active">
+            <a className="nav-link">
+              <Link to='/Node1'>
+                Node1
+              </Link>
+               
+            </a>
+          </li>
+          <li className="nav-item active">
+            <a className="nav-link">
+              <Link to='/Node2'>
+                Node2
+              </Link>
+               
+            </a>
+          </li>
+          <li className="nav-item active">
+            <a className="nav-link">
+              <Link to='/Node3'>
+                Node3
+              </Link>
+               
+            </a>
+          </li>
+                {/* <li className="nav-item">
             <a className="nav-link" href="#">
               
             </a>
