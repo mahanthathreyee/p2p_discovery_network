@@ -11,9 +11,20 @@ import React, { useState, useEffect } from "react";
 
 function Node1() { 
 
+  const [date, setDate] = useState(new Date());
+  
+  useEffect(() => {
+        var timer = setInterval(()=>setDate(new Date()), 1000 )
+        return function cleanup() {
+            clearInterval(timer)
+        }
+    
+    });
 
   return ( 
+    
     <div>
+      <Navbar />
      
       {/* <div>
         <ul>
@@ -37,25 +48,25 @@ function Node1() {
         <tr>
           <td>1</td>
           <td><a href="*"> Node 1</a></td>
-          <td>11:00</td>
+          <td>{date.toLocaleTimeString()}</td>
           <td>running</td>
         </tr>
         <tr>
           <td>2</td>
           <td><a href="*"> Node 2</a></td>
-          <td>11:05</td>
+          <td>{date.toLocaleTimeString()}</td>
           <td>running</td>
         </tr>
         <tr>
           <td>3</td>
           <td><a href="*"> Node 3</a></td>
-            <td>12:05</td>
+            <td>{date.toLocaleTimeString()}</td>
             <td>running</td>
           </tr>
           <tr>
           <td>4</td>
           <td><a href="*"> Node 4</a></td>
-            <td>12:40</td>
+            <td>{date.toLocaleTimeString()}</td>
             <td>running</td>
             </tr>
       </tbody> 
@@ -69,9 +80,15 @@ function Node1() {
         <h4>List of Files</h4>
       
         <ul align="left">
-          <li><a href='*'>File1.txt</a></li>
-          <li><a href='*'>File2.txt</a></li>
-          <li><a href='*'>File3.txt</a></li>  
+          <li><a href="/" download="a.txt">
+            a.txt
+          </a></li>
+          <li><a href="/" download="b.txt">
+            b.txt
+          </a></li>
+          <li><a href="/" download="c.txt">
+            c.txt 
+          </a></li>  
         </ul>
 
       </div>
