@@ -31,7 +31,7 @@ def register_node():
 @discover_endpoint.get('')
 def get_all_nodes():
     nodes = node_handler.get_nodes()
-    nodes = [json_handler.encode(v) for v in nodes]
+    nodes = [v.__dict__ for v in nodes]
 
     return nodes, 200
 

@@ -1,10 +1,9 @@
 import json
 
-def encode(object: object):
-    return json.dumps(object.__dict__)
+def encode(o: object):
+    return json.dumps(o.__dict__)
 
 def decode(json_str: str, cls: object):
-    print(type(json_str))
     return decoder(json.loads(json_str), cls)
 
 def decoder(json, cls: object):

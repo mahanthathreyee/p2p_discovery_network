@@ -17,6 +17,7 @@ from utils import json_handler
 # ROUTES
 from routes import discovery
 from routes import communication
+from routes import file
 
 # CONSTANTS
 from constants import app_constants
@@ -45,11 +46,12 @@ def load_configurations():
         app_constants.CURRENT_WORKING_DIRECTORY.mkdir(exist_ok=True, parents=True)
 
     app_security.load_or_create_new_key()
-    config_store.NODE_IP = f'{ENV_VARIABLES["host"]}:{ENV_VARIABLES["port"]}'
+    config_store.NODE_IP = f'{ENV_VARIABLES["public_addr"]}:{ENV_VARIABLES["port"]}'
 
 def register_api_routes():
     app.register_blueprint(discovery.discover_endpoint)
     app.register_blueprint(communication.communicate_endpoint)
+    app.register_blueprint(file.file_endpoint)
 
 def register_child_with_primary():
     name = namesgenerator.get_random_name()
@@ -74,15 +76,16 @@ def get_cluster_nodes():
         f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
     )
 
+    nodes = None
     if data_nodes.ok:
-        logger_handler.logging.info(f'Nodes retrieved: {data_nodes}')
+        nodes = data_nodes.json()
+        logger_handler.logging.info(f'Nodes retrieved: {nodes}')
     else:
         logger_handler.logging.info(f'Cannot retrieve node list: {data_nodes.status_code} - {data_nodes.content}')
         exit()
     
-    nodes = data_nodes.json()
     data_nodes.close()
-    nodes = [json_handler.decode(node, Node) for node in nodes]
+    nodes = [json_handler.decoder(node, Node) for node in nodes]
     node_handler.store_nodes(nodes)
 
 #endregion

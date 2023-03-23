@@ -10,8 +10,7 @@ class FileSearch:
         self.requestor = None
         self.search_id = None
         self.requested_at = time.time_ns()
-        self.response = False
-        self.responses = []
+        self.responses = {}
 
     def new(file_hash: str, file_name: str, requestor: str, search_id: str, requested_at: int):
         file_search = FileSearch()
@@ -21,7 +20,6 @@ class FileSearch:
         file_search.requestor = requestor
         file_search.search_id = search_id
         file_search.requested_at = requested_at
-        file_search.response = False
-        file_search.responses = []
+        file_search.responses = {}
 
         return file_search

@@ -5,7 +5,7 @@ from enum import Enum
 CONFIG_FILE = 'config/config.json'
 CURRENT_WORKING_DIRECTORY = Path(os.getcwd())
 APP_ENVIRONMENT_FILE = '.env'
-NEIGBOR_NODES = 3
+NEIGBOR_NODES = 1
 
 class NODE_HEALTH(Enum):
     UNKNOWN = 'UNKNOWN'
