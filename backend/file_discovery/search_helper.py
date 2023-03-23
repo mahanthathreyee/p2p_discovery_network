@@ -122,7 +122,6 @@ def forward_file_search_req_to_neighbors(file_search_request: FileSearch):
         logger_handler.logging.info(f'Requesting neighbor {node.name}@{node.ip} for file')
         node_endpoint = f'http://{node.ip}/communicate'
 
-        print(file_search_req_message.dict())
         forward_request = requests.post(
             url=node_endpoint,
             json=file_search_req_message.dict()

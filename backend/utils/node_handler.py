@@ -24,7 +24,7 @@ def get_nodes() -> list[Node]:
     nodes = redis_handler.REDIS.hgetall(REDIS_KEYS['NODE_DICT'])
     return [json_handler.decode(v, Node) for v in nodes.values()]
 
-def get_node(ip: str) -> list[Node]:
+def get_node(ip: str) -> Node:
     node = redis_handler.REDIS.hget(REDIS_KEYS['NODE_DICT'], ip)
     if not node:
         return None

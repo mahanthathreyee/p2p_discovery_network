@@ -11,7 +11,7 @@ class Node:
         self.health = NODE_HEALTH.UNKNOWN.name
         self.last_checked = time.time_ns()
 
-    def new(ip: str, public_key: str, name: str, health = None, last_checked = time.time_ns()):
+    def new(ip: str, public_key: str, name: str, health = NODE_HEALTH.UNKNOWN.name, last_checked = time.time_ns()):
         node = Node()
         
         node.ip = ip

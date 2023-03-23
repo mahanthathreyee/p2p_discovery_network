@@ -10,14 +10,17 @@ import config_store
 from classes.node import Node
 from utils import redis_handler
 from utils import logger_handler
-from utils import cryptography_handler as app_security
 from utils import node_handler
 from utils import json_handler
+from utils import node_health_handler
+from utils import cryptography_handler as app_security
+from utils.repeated_timer_util import RepeatedTimer
 
 # ROUTES
 from routes import discovery
 from routes import communication
 from routes import file
+from routes import health
 
 # CONSTANTS
 from constants import app_constants
@@ -27,6 +30,7 @@ from constants import app_constants
 app = Flask(__name__)
 ENV_VARIABLES = None
 LOCAL_DEBUG = True
+HEALTH_CHECK_PROCESS = None
 #endregion
 
 #region UTILITIES
@@ -52,6 +56,7 @@ def register_api_routes():
     app.register_blueprint(discovery.discover_endpoint)
     app.register_blueprint(communication.communicate_endpoint)
     app.register_blueprint(file.file_endpoint)
+    app.register_blueprint(health.health_endpoint)
 
 def register_child_with_primary():
     name = namesgenerator.get_random_name()
@@ -98,5 +103,10 @@ if __name__ == '__main__':
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
         get_cluster_nodes()
+    else:
+        HEALTH_CHECK_PROCESS: RepeatedTimer = node_health_handler.init_health_check_thread()
 
     app.run(host=ENV_VARIABLES['host'], port=ENV_VARIABLES['port'], debug=LOCAL_DEBUG)
+    
+    if HEALTH_CHECK_PROCESS:
+        HEALTH_CHECK_PROCESS.stop()
