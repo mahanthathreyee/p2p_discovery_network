@@ -3,6 +3,7 @@ from utils import json_handler
 from file_discovery import search_helper
 from file_discovery import node_file_handler
 
+import io
 from flask import Blueprint, request, send_file
 
 file_endpoint = Blueprint(
@@ -35,10 +36,33 @@ def get_search_results(search_id: str):
 @file_endpoint.post('/download')
 def download_file():
     body = request.json
-    if not request_handler.check_request_json(body, ['file_name', 'requestor']):
+    if not request_handler.check_request_json(body, ['file_name']):
         return 'Bad Request', 400
 
     file = node_file_handler.get_file(body['file_name'])
     if file:
         return send_file(file), 200
     return 'File not found', 404
+
+@file_endpoint.post('/secure/download')
+def download_file_securely():
+    body = request.json
+    if not request_handler.check_request_json(body, ['file_name', 'key']):
+        return 'Bad Request', 400
+    
+    encrypted_file = node_file_handler.get_file_securely(body['file_name'], body['key'])
+    if encrypted_file:
+        return send_file(
+            io.BytesIO(encrypted_file),
+            download_name=body['file_name']
+        ), 200
+    return 'File not found', 404
+
+@file_endpoint.post('/secure/download_to_node')
+def download_file_securely_to_node():
+    body = request.json
+    if not request_handler.check_request_json(body, ['file_name', 'owner']):
+        return 'Bad Request', 400
+    
+    node_file_handler.download_file_securely(body['file_name'], body['owner'])
+    return 'File Downloaded', 200

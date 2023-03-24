@@ -2,13 +2,17 @@
 import config_store
 from utils import file_handler
 from utils import logger_handler
+from file_discovery import node_file_handler
 
 from constants import cryptography_constants as constants
 
 import pickle
 import base64
+from pathlib import Path
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 #endregion
@@ -75,6 +79,20 @@ def encrypt_data(raw_content):
 
     return cipher_text
 
+def encrypt_data_with_key(raw_content, key):
+    public_key = serialization.load_der_public_key(base64.b64decode(key))
+    
+    cipher_text = public_key.encrypt(
+        pickle.dumps(raw_content),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    return cipher_text
+
 def decrypt_data(cipher_text: str):
     raw_content = PRIVATE_KEY.decrypt(
         cipher_text,
@@ -87,6 +105,37 @@ def decrypt_data(cipher_text: str):
 
     return pickle.loads(raw_content)
 
+def encrypt_file(file_name: str, key: str):
+    file: Path = node_file_handler.get_file(file_name)
+    print('asdasd', file_name, file.exists())
+    if not file or not file.exists:
+        return None
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=base64.b64decode('QhiLlZpIguCoNOPm2BiaKw=='),
+        iterations=480000
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(bytes(key, 'utf-8')))
+    fernet = Fernet(key)
+
+    with open(file, 'rb') as f:
+        content = f.read()
+
+    return fernet.encrypt(content)
+
+def decrypt_file(content, key: str):
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=base64.b64decode('QhiLlZpIguCoNOPm2BiaKw=='),
+        iterations=480000
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(bytes(key, 'utf-8')))
+    fernet = Fernet(key)
+
+    return fernet.decrypt(content)
 
 def get_public_key():
     key = PUBLIC_KEY.public_bytes(
