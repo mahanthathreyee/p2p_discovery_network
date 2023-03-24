@@ -74,10 +74,10 @@ def send_response_to_requestor(request: FileSearch):
     if file_search_request.ok:
         logger_handler.logging.info(f'Search response sent to requestor for search ID {request.search_id}')
 
-def file_found_handler(request: FileSearch, file_owner: str):
+def file_found_handler(request: FileSearch, file_owner: str) -> FileSearch:
     request.responses[file_owner] = True
     logger_handler.logging.info(f'File found for search ID: {request.search_id} at node {file_owner}')
-    
+
     if request.requestor == file_owner:
         file_search_response_store.acquire()
         logger_handler.logging.info("file_search_response_store lock acquired")
@@ -87,7 +87,7 @@ def file_found_handler(request: FileSearch, file_owner: str):
             request.search_id
         )
 
-        search_request: FileSearch = json_handler.decoder(search_request, FileSearch)
+        search_request: FileSearch = json_handler.decode(search_request, FileSearch)
         search_request.responses[file_owner] = True
 
         redis_handler.REDIS.hset(
@@ -96,10 +96,14 @@ def file_found_handler(request: FileSearch, file_owner: str):
             json_handler.encode(search_request)
         )
 
+        request = search_request
+
         logger_handler.logging.info("file_search_response_store lock released")
         file_search_response_store.release()
     else:
         send_response_to_requestor(request)
+    
+    return request
 
 def forward_file_search_req_to_neighbors(file_search_request: FileSearch):
     file_search_request.responses[config_store.NODE_IP] = False
@@ -142,7 +146,8 @@ def handle_search_request(request: FileSearch):
     # TODO check if request already handled 
     
     if node_file_handler.search_node_files(request.file_hash):
-        file_found_handler(request, config_store.NODE_IP)
+        request = file_found_handler(request, config_store.NODE_IP)
+        return request
 
     forward_file_search_req_to_neighbors(request)
     

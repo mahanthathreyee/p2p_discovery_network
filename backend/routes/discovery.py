@@ -19,7 +19,7 @@ discover_endpoint = Blueprint(
 @discover_endpoint.post('')
 def register_node():
     body = request.json
-    if not request_handler.check_request_json(body, ['ip', 'public_key', 'name']):
+    if not request_handler.check_request_json(body, ['ip', 'public_key', 'name', 'latitude', 'longitude']):
         return 'Bad Request', 400
     
     logger_handler.logging.info(f'Create node: {body}')

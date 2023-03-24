@@ -10,8 +10,10 @@ class Node:
         self.name = None
         self.health = NODE_HEALTH.UNKNOWN.name
         self.last_checked = time.time_ns()
+        self.latitude = None
+        self.longitude = None
 
-    def new(ip: str, public_key: str, name: str, health = NODE_HEALTH.UNKNOWN.name, last_checked = time.time_ns()):
+    def new(ip: str, public_key: str, name: str, latitude: float, longitude: float, health = NODE_HEALTH.UNKNOWN.name, last_checked = time.time_ns()):
         node = Node()
         
         node.ip = ip
@@ -19,5 +21,7 @@ class Node:
         node.name = name
         node.health = health
         node.last_checked = last_checked
+        node.latitude = latitude
+        node.longitude = longitude
 
         return node

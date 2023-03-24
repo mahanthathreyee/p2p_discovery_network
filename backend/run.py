@@ -16,12 +16,14 @@ from utils import json_handler
 from utils import node_health_handler
 from utils import cryptography_handler as app_security
 from utils.repeated_timer_util import RepeatedTimer
+from file_discovery import node_file_handler
 
 # ROUTES
 from routes import discovery
 from routes import communication
 from routes import file
 from routes import health
+from routes import replication
 
 # CONSTANTS
 from constants import app_constants
@@ -55,17 +57,22 @@ def load_configurations():
     app_security.load_or_create_new_key()
     config_store.NODE_IP = f'{ENV_VARIABLES["public_addr"]}:{ENV_VARIABLES["port"]}'
 
+    node_file_handler.configure()
+
 def register_api_routes():
     app.register_blueprint(discovery.discover_endpoint)
     app.register_blueprint(communication.communicate_endpoint)
     app.register_blueprint(file.file_endpoint)
     app.register_blueprint(health.health_endpoint)
+    app.register_blueprint(replication.replication_endpoint)
 
 def register_child_with_primary():
-    name = namesgenerator.get_random_name()
+    name = ENV_VARIABLES.get('name', namesgenerator.get_random_name())
     public_key = app_security.get_public_key()
+    latitude = float(ENV_VARIABLES['latitude'])
+    longitude = float(ENV_VARIABLES['longitude'])
 
-    node = Node.new(config_store.NODE_IP, public_key, name)
+    node = Node.new(config_store.NODE_IP, public_key, name, latitude, longitude)
     new_node_request = requests.post(
         f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
         json=node.__dict__

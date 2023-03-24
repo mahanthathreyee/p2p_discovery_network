@@ -11,9 +11,6 @@ DATA_PATH = None
 
 def load_node_files():
     # TODO Wait time before running updating data list
-
-    global DATA_PATH
-    DATA_PATH = app_constants.CURRENT_WORKING_DIRECTORY / config_store.APP_CONFIG['data_path']
     DATA_PATH.mkdir(exist_ok=True)
     
     node_files = {}
@@ -48,3 +45,7 @@ def get_file(file_name: str) -> object:
         return DATA_PATH / file
     else:
         return None
+    
+def configure():
+    global DATA_PATH
+    DATA_PATH = app_constants.CURRENT_WORKING_DIRECTORY / config_store.APP_CONFIG['data_path']
