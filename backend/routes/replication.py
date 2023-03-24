@@ -20,7 +20,7 @@ def initiate_replication():
 def select_replicate_nodes():
     body = request.json
     if not request_handler.check_request_json(body, ['requestor']):
-        return 'Bad Request', 400
+        return {'status': 'Request fields missing'}, 400
     
     return replication_handler.select_nodes(body['requestor']), 200
 
@@ -28,7 +28,7 @@ def select_replicate_nodes():
 def replicate_data():
     body = request.json
     if not request_handler.check_request_json(body, ['files','requestor']):
-        return 'Bad Request', 400
+        return {'status': 'Request fields missing'}, 400
     replication_handler.replicate_data(body['files'], body['requestor'])
     return {'status': 'SUCCESS'}, 200
 

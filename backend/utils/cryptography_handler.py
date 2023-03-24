@@ -107,7 +107,6 @@ def decrypt_data(cipher_text: str):
 
 def encrypt_file(file_name: str, key: str):
     file: Path = node_file_handler.get_file(file_name)
-    print('asdasd', file_name, file.exists())
     if not file or not file.exists:
         return None
 

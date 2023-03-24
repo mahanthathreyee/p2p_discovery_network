@@ -20,7 +20,7 @@ discover_endpoint = Blueprint(
 def register_node():
     body = request.json
     if not request_handler.check_request_json(body, ['ip', 'public_key', 'name', 'latitude', 'longitude']):
-        return 'Bad Request', 400
+        return {'status': 'Request fields missing'}, 400
     
     logger_handler.logging.info(f'Create node: {body}')
     node = json_handler.decoder(body, Node)

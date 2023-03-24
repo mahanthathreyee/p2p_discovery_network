@@ -96,10 +96,9 @@ if __name__ == '__main__':
 
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
-        # node_handler.init_node_retrieval()
+        node_handler.init_node_retrieval()
     else:
-        pass
-        # node_health_handler.init_health_check_thread()
+        node_health_handler.init_health_check_thread()
 
     app.run(
         host=ENV_VARIABLES['host'], 

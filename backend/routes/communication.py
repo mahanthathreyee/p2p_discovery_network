@@ -24,7 +24,7 @@ communicate_endpoint = Blueprint(
 def recieve_message():
     body = request.json
     if not request_handler.check_request_json(body, ['content', 'sender']):
-        return 'Bad Request', 400
+        return {'status': 'Request fields missing'}, 400
     
     logger_handler.logging.info(f'Message received: {body}')
     message: Message = json_handler.decoder(body, Message)

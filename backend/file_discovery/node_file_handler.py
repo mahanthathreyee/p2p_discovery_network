@@ -54,7 +54,10 @@ def get_file(file_name: str) -> object:
 
 def get_file_securely(file_name: str, encryped_key: str):
     key = cryptography_handler.decrypt_data(base64.b64decode(encryped_key))
-    return cryptography_handler.encrypt_file(file_name, key)
+    logger_handler.logging.info(f'Received request to download file {file_name} securely with key {encryped_key}')
+    encrypted_file = cryptography_handler.encrypt_file(file_name, key)
+    logger_handler.logging.info('File has been encrypted with given key')
+    return encrypted_file
 
 def download_file_securely(file_name: str, data_holder: str):
     file_hash = hash_handler.generate_hash(file_name)
@@ -65,8 +68,9 @@ def download_file_securely(file_name: str, data_holder: str):
     holder_node = node_handler.get_node(data_holder)
     encrypted_key = cryptography_handler.encrypt_data_with_key(transfer_key, holder_node.public_key)
     encrypted_key = base64.b64encode(encrypted_key).decode('utf-8')
+    logger_handler.logging.info(f'Transfer key encrypted with owner\'s public key: {encrypted_key}')
 
-    logger_handler.logging.info(f'Encrypted key: {encrypted_key}')
+    logger_handler.logging.info(f'Requesting owner {data_holder} to download file {file_name} securely')
     file_downlaod = requests.post(
         url=f'http://{holder_node.ip}/files/secure/download',
         json={
@@ -75,13 +79,17 @@ def download_file_securely(file_name: str, data_holder: str):
         }
     )
     
-    if file_downlaod.ok:
-        logger_handler.logging.info(f'File downloaded')
-        file = cryptography_handler.decrypt_file(file_downlaod.content, transfer_key)
-        with open(DATA_PATH / file_name, 'wb') as f:
-            f.write(file)
-    else:
+    if not file_downlaod.ok:
         logger_handler.logging.info(f'Failed to retrieve file')
+        return False
+    
+    logger_handler.logging.info(f'Received encrypted file')
+    file = cryptography_handler.decrypt_file(file_downlaod.content, transfer_key)
+    logger_handler.logging.info(f'File decrypted')
+    with open(DATA_PATH / file_name, 'wb') as f:
+        f.write(file)
+        logger_handler.logging.info(f'File stored to disk with name {file_name}')
+    return True
 
 def configure():
     global DATA_PATH
