@@ -3,7 +3,7 @@ from utils import json_handler
 from file_discovery import search_helper
 from file_discovery import node_file_handler
 
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 
 file_endpoint = Blueprint(
     'file_endpoint', 
@@ -31,3 +31,14 @@ def get_files():
 def get_search_results(search_id: str):
     search_results = search_helper.get_search_results(search_id)
     return search_results.__dict__, 200
+
+@file_endpoint.post('/download')
+def download_file():
+    body = request.json
+    if not request_handler.check_request_json(body, ['file_name', 'requestor']):
+        return 'Bad Request', 400
+
+    file = node_file_handler.get_file(body['file_name'])
+    if file:
+        return send_file(file), 200
+    return 'File not found', 404

@@ -7,10 +7,13 @@ from utils import hash_handler
 import os
 from pathlib import Path
 
+DATA_PATH = None
+
 def load_node_files():
     # TODO Wait time before running updating data list
 
-    DATA_PATH: Path = app_constants.CURRENT_WORKING_DIRECTORY / config_store.APP_CONFIG['data_path']
+    global DATA_PATH
+    DATA_PATH = app_constants.CURRENT_WORKING_DIRECTORY / config_store.APP_CONFIG['data_path']
     DATA_PATH.mkdir(exist_ok=True)
     
     node_files = {}
@@ -36,3 +39,12 @@ def search_node_files(file_hash: str) -> bool:
     if not redis_handler.REDIS.exists(REDIS_KEYS['DATA_FILES']):
         return None
     return redis_handler.REDIS.hget(REDIS_KEYS['DATA_FILES'], file_hash)
+
+def get_file(file_name: str) -> object:
+    file_hash = hash_handler.generate_hash(file_name)
+    file = search_node_files(file_hash)
+    if file:
+        global DATA_PATH
+        return DATA_PATH / file
+    else:
+        return None
