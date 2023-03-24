@@ -2,7 +2,8 @@ REDIS_KEYS = {
     'NODE_DICT': 'nodes',
     'MESSAGES': 'messages',
     'FILE_SEARCH': 'file_search',
-    'DATA_FILES': 'data_files'
+    'DATA_FILES': 'data_files',
+    'FILE_SEARCH_PROCESSED': 'file_search_processed'
 }
 
 def configure(prefix: str):

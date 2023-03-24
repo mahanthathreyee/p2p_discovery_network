@@ -137,19 +137,28 @@ def forward_file_search_req_to_neighbors(file_search_request: FileSearch):
         if forward_request.ok:
             logger_handler.logging.info(f'Requested neighbor {node.name}@{node.ip} for file')
 
-    if file_search_request.requestor == config_store.NODE_IP:
+    if file_search_request.requestor != config_store.NODE_IP:
         send_response_to_requestor(file_search_request)
 
 def handle_search_request(request: FileSearch):
     logger_handler.logging.info(f'Search request received: {request.__dict__}')
-    
-    # TODO check if request already handled 
+
+    if redis_handler.REDIS.exists(REDIS_KEYS['FILE_SEARCH_PROCESSED']):
+        if redis_handler.REDIS.hexists(REDIS_KEYS['FILE_SEARCH_PROCESSED'], request.search_id):
+            logger_handler.logging.info(f'Search request already processed')
+            return request
     
     if node_file_handler.search_node_files(request.file_hash):
         request = file_found_handler(request, config_store.NODE_IP)
         return request
 
     forward_file_search_req_to_neighbors(request)
+
+    redis_handler.REDIS.hset(
+        REDIS_KEYS['FILE_SEARCH_PROCESSED'],
+        request.search_id,
+        str(True)
+    )
     
     return request
 
