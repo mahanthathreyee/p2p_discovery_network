@@ -1,10 +1,19 @@
-from constants.redis_constants import REDIS_KEYS
 import config_store
+
+from constants.redis_constants import REDIS_KEYS
+
 from utils import file_handler
 from utils import json_handler
 from utils import redis_handler
+from utils import logger_handler
+from utils.repeated_timer_util import RepeatedTimer
+
 from classes.node import Node
+
 import json
+import requests
+
+NODE_RETRIEVAL_INTERVAL = 15
 
 def backup_nodes(nodes):
     node_backup_file = file_handler.get_absolute_file_location(config_store.APP_CONFIG['nodes_backup_file'])
@@ -29,3 +38,29 @@ def get_node(ip: str) -> Node:
     if not node:
         return None
     return json_handler.decode(node, Node)
+
+def get_cluster_nodes():
+    try: 
+        data_nodes = requests.get(
+            f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
+        )
+    except Exception as e:
+        logger_handler.logging.info(f'An error occurred while attempting to retrieve node list: {e}')
+        return
+
+    nodes = None
+    if data_nodes.ok:
+        nodes = data_nodes.json()
+        logger_handler.logging.info(f'Nodes retrieved: {nodes}')
+    else:
+        logger_handler.logging.info(f'Cannot retrieve node list: {data_nodes.status_code} - {data_nodes.content}')
+    
+    data_nodes.close()
+    nodes = [json_handler.decoder(node, Node) for node in nodes]
+    store_nodes(nodes)
+
+def init_node_retrieval() -> RepeatedTimer:
+    return RepeatedTimer(
+        NODE_RETRIEVAL_INTERVAL,
+        get_cluster_nodes
+    )

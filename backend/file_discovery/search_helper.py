@@ -45,8 +45,9 @@ def generate_search_id(file_name: str) -> FileSearch:
 
 def get_neighbor_nodes(node_count: int, nodes_completed: list[str]) -> set[Node]:
     nodes = node_handler.get_nodes()
-    nodes = [node for node in nodes if node.ip not in nodes_completed]
+    nodes = [node for node in nodes if node.ip not in nodes_completed and node.health == app_constants.NODE_HEALTH.ONLINE.name]
     
+    logger_handler.logging.info(f'Nodes neighbors acceptable {nodes}')
     if len(nodes) <= node_count:
         return set(nodes)
     
@@ -107,6 +108,8 @@ def forward_file_search_req_to_neighbors(file_search_request: FileSearch):
         app_constants.NEIGBOR_NODES, 
         list(file_search_request.responses.keys())
     )
+
+    logger_handler.logging.info(f'Neighbor nodes to forward: {neighbors}')
 
     for neighbor in neighbors:
         file_search_request.responses[neighbor.ip] = None

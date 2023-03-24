@@ -4,6 +4,7 @@ import dotenv
 import requests
 import namesgenerator
 from flask import Flask
+from flask_cors import CORS
 
 # CONFIGURATION
 import config_store
@@ -28,9 +29,11 @@ from constants import app_constants
 
 #region LOCAL CONSTANTS
 app = Flask(__name__)
+CORS(app)
 ENV_VARIABLES = None
 LOCAL_DEBUG = True
 HEALTH_CHECK_PROCESS = None
+NODE_RETRIEVAL_PROCESS = None
 #endregion
 
 #region UTILITIES
@@ -76,23 +79,6 @@ def register_child_with_primary():
     
     new_node_request.close()
 
-def get_cluster_nodes():
-    data_nodes = requests.get(
-        f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
-    )
-
-    nodes = None
-    if data_nodes.ok:
-        nodes = data_nodes.json()
-        logger_handler.logging.info(f'Nodes retrieved: {nodes}')
-    else:
-        logger_handler.logging.info(f'Cannot retrieve node list: {data_nodes.status_code} - {data_nodes.content}')
-        exit()
-    
-    data_nodes.close()
-    nodes = [json_handler.decoder(node, Node) for node in nodes]
-    node_handler.store_nodes(nodes)
-
 #endregion
 
 if __name__ == '__main__':
@@ -102,7 +88,7 @@ if __name__ == '__main__':
 
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
-        get_cluster_nodes()
+        NODE_RETRIEVAL_PROCESS: RepeatedTimer = node_handler.init_node_retrieval()
     else:
         HEALTH_CHECK_PROCESS: RepeatedTimer = node_health_handler.init_health_check_thread()
 
@@ -110,3 +96,6 @@ if __name__ == '__main__':
     
     if HEALTH_CHECK_PROCESS:
         HEALTH_CHECK_PROCESS.stop()
+
+    if NODE_RETRIEVAL_PROCESS:
+        NODE_RETRIEVAL_PROCESS.stop()
