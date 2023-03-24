@@ -12,7 +12,7 @@ class Node:
         self.last_checked = time.time_ns()
         self.latitude = None
         self.longitude = None
-        self.node_leader_value = 0
+        self.node_leader_value = -1
 
     def new(ip: str, public_key: str, name: str, latitude: float, longitude: float, health = NODE_HEALTH.UNKNOWN.name, last_checked = time.time_ns()):
         node = Node()

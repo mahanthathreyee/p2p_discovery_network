@@ -8,6 +8,7 @@ import json
 #region CONFIGURATIONS
 APP_CONFIG = {}
 NODE_IP = None
+NODE_LEADER_VALUE = -1
 #endregion
 
 #region UTILITIES

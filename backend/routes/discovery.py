@@ -24,7 +24,7 @@ def register_node():
     
     logger_handler.logging.info(f'Create node: {body}')
     node = json_handler.decoder(body, Node)
-    node_handler.store_node(node)
+    node = node_handler.store_node(node)
 
     return json_handler.encode(node), 200
 

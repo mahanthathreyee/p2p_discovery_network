@@ -35,8 +35,6 @@ app = Flask(__name__)
 CORS(app)
 ENV_VARIABLES = None
 LOCAL_DEBUG = True
-HEALTH_CHECK_PROCESS = None
-NODE_RETRIEVAL_PROCESS = None
 #endregion
 
 #region UTILITIES
@@ -81,6 +79,8 @@ def register_child_with_primary():
 
     if new_node_request.ok:
         logger_handler.logging.info(f'New Node {name} registered with primary')
+        body = new_node_request.json()
+        config_store.NODE_LEADER_VALUE =  body['node_leader_value']
     else:
         logger_handler.logging.info(f'Cannot register node: {new_node_request.status_code} - {new_node_request.content}')
         exit()
@@ -96,14 +96,16 @@ if __name__ == '__main__':
 
     if ENV_VARIABLES['node'] != 'PRIMARY':
         register_child_with_primary()
-        NODE_RETRIEVAL_PROCESS: RepeatedTimer = node_handler.init_node_retrieval()
+        node_handler.init_node_retrieval()
     else:
-        HEALTH_CHECK_PROCESS: RepeatedTimer = node_health_handler.init_health_check_thread()
+        node_health_handler.init_health_check_thread()
 
-    app.run(host=ENV_VARIABLES['host'], port=ENV_VARIABLES['port'], debug=LOCAL_DEBUG)
-    
-    if HEALTH_CHECK_PROCESS:
-        HEALTH_CHECK_PROCESS.stop()
-
-    if NODE_RETRIEVAL_PROCESS:
-        NODE_RETRIEVAL_PROCESS.stop()
+    app.run(
+        host=ENV_VARIABLES['host'], 
+        port=ENV_VARIABLES['port'], 
+        debug=LOCAL_DEBUG,
+        use_reloader=False
+    )
+        
+    node_handler.stop_node_retrieval()
+    node_health_handler.stop_health_check_thread()

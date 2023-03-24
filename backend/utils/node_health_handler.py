@@ -9,6 +9,7 @@ from threading import Lock
 import requests
 
 HEALTH_CHECK_INTERVAL = 15
+HEALTH_CHECK_PROCESS = None
 health_lock_retrieval_semaphone = Lock()
 health_check_locks: dict[str, Lock] = {}
 
@@ -55,8 +56,14 @@ def check_status_of_all_nodes():
     for thread in health_threads:
         thread.join()
 
-def init_health_check_thread() -> RepeatedTimer:
-    return RepeatedTimer(
+def init_health_check_thread():
+    global HEALTH_CHECK_PROCESS
+    HEALTH_CHECK_PROCESS = RepeatedTimer(
         HEALTH_CHECK_INTERVAL,
         check_status_of_all_nodes
     )
+
+def stop_health_check_thread():
+    global HEALTH_CHECK_PROCESS
+    if HEALTH_CHECK_INTERVAL:
+        HEALTH_CHECK_PROCESS.stop()
