@@ -6,6 +6,8 @@ REDIS_KEYS = {
     'FILE_SEARCH_PROCESSED': 'file_search_processed'
 }
 
+PRIMARY_NODE = 'primary_node'
+
 def configure(prefix: str):
     for k, v in REDIS_KEYS.items():
         REDIS_KEYS[k] = prefix + ":" + v

@@ -34,7 +34,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 def initiate_replication():
     logger_handler.logging.info('Initiating replication')
     select_nodes_request = requests.post(
-        f'http://{config_store.APP_CONFIG["primary_node"]}/replication/select_nodes',
+        f'http://{primary_node_handler.get_primary_node()}/replication/select_nodes',
         json={
             'requestor': config_store.NODE_IP
         }

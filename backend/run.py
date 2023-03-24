@@ -12,7 +12,8 @@ from classes.node import Node
 from utils import redis_handler
 from utils import logger_handler
 from utils import node_handler
-from utils import json_handler
+from utils import redis_handler
+from utils import primary_node_handler
 from utils import node_health_handler
 from utils import cryptography_handler as app_security
 from utils.repeated_timer_util import RepeatedTimer
@@ -74,7 +75,7 @@ def register_child_with_primary():
 
     node = Node.new(config_store.NODE_IP, public_key, name, latitude, longitude)
     new_node_request = requests.post(
-        f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
+        f'http://{primary_node_handler.get_primary_node()}/discover',
         json=node.__dict__
     )
 

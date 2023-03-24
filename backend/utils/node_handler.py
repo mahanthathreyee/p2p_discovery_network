@@ -6,6 +6,7 @@ from utils import file_handler
 from utils import json_handler
 from utils import redis_handler
 from utils import logger_handler
+from utils import primary_node_handler
 from utils.repeated_timer_util import RepeatedTimer
 
 from classes.node import Node
@@ -42,7 +43,7 @@ def get_node(ip: str) -> Node:
 def get_cluster_nodes():
     try: 
         data_nodes = requests.get(
-            f'http://{config_store.APP_CONFIG["primary_node"]}/discover',
+            f'http://{primary_node_handler.get_primary_node()}/discover',
         )
     except Exception as e:
         logger_handler.logging.info(f'An error occurred while attempting to retrieve node list: {e}')
